@@ -3,94 +3,146 @@ package interpreter;
 import java.io.*;
 class myScanner
 {
+	private int startChar ;
+	void init() throws IOException
+	{
+		startChar = getNextChar();
+	}
+
+	int getNextChar() throws IOException
+	{
+		return (System.in.read());
+	}
+
+	StringBuilder getLiteralAtom(int ch) throws IOException
+	{
+		if(isErrorChar(ch))
+		{
+			StringBuilder errorVal= new StringBuilder();
+			errorVal.append("!");
+			return errorVal.insert(0,(char)ch);
+		}
+		else if((ch>=65&&ch<=91)||(ch>=48&&ch<=57))
+		{
+			return getLiteralAtom(getNextChar()).insert(0,(char)ch);
+		}
+		else
+		{
+			StringBuilder val= new StringBuilder();
+			return val.append((char)ch);
+		}
+	}
+
+	StringBuilder getNumeralAtom(int ch) throws IOException
+	{
+		if(isErrorChar(ch))
+		{
+			StringBuilder errorVal= new StringBuilder();
+			errorVal.append("!");
+			return errorVal.insert(0,(char)ch);
+		}
+		else if((ch>=65&&ch<=91))
+		{
+			StringBuilder errorVal= new StringBuilder();
+			errorVal.append("!");
+			return errorVal.insert(0,(char)ch);
+		}
+		else if((ch>=48&&ch<=57))
+		{
+			return getNumeralAtom(getNextChar()).insert(0,(char)ch);
+		}
+		else
+		{
+			StringBuilder val= new StringBuilder();
+			return val.append((char)ch);
+		}
+	}
+
+	boolean isErrorChar(int ch)
+	{
+		if(!((ch==40)|(ch==41)||(ch>=65&&ch<=91)||(ch>=48&&ch<=57)||(ch==32)||(ch==13)||(ch==10)||(ch==-1)))
+		{
+			//System.out.println("ERROR: Invalid token " + (char)ch);
+			return true;
+		}
+		return false;
+	}
+
   String[] getNextToken() throws IOException
   {
-    int ch;
-    int startChar = 0; // using startChar to keep track of whether the current character is the first (startChar = 0), part of a numeric atom (1), part of a literal atom(2)
-    StringBuilder tokenVal= new StringBuilder(); // For building the literal and numeric atoms
-    String[] scannerResult = new String[4]; // 0 - Type of token, 1 - value of token, 2 - type of atom, 3 - reason for the end of atom
-    while((ch=System.in.read())!=-1)
+		int ch = startChar;
+		String[] scannerResult = new String[3]; // 0 - Type of token, 1 - value of token, 2 - type of atom, 3 - next start character
+
+    // If current character is an open parentheses
+    if(ch==40)
     {
-      // If current character is an open parentheses
-      if(ch==40)
-      {
-        if(startChar==0)
-        {
-          scannerResult[0] = "OPEN PARENTHESES";
-          return scannerResult;
-        }
-        else
-        {
-          scannerResult[0] = "ATOM";
-          scannerResult[1] = tokenVal.toString();
-          scannerResult[2] = Integer.toString(startChar);
-          scannerResult[3] = "OPEN PARENTHESES";
-          return scannerResult;
-        }
-      }
-      // If current character is a closing parentheses
-      else if(ch==41)
-      {
-        if(startChar==0)
-        {
-          scannerResult[0] = "CLOSING PARENTHESES";
-          return scannerResult;
-        }
-        else
-        {
-          scannerResult[0] = "ATOM";
-          scannerResult[1] = tokenVal.toString();
-          scannerResult[2] = Integer.toString(startChar);
-          scannerResult[3] = "CLOSING PARENTHESES";
-          return scannerResult;
-        }
-      }
-      // If current character is an uppercase letter
-      else if(ch>=65&&ch<=91)
-      {
-        if(startChar==0)
-        {
-          startChar = 2;
-        }
-        else if(startChar==1)
-        {
-          tokenVal.append((char)ch);
-          scannerResult[0] = "ERROR";
-          scannerResult[1] = tokenVal.toString();
-          return scannerResult;
-        }
-        tokenVal.append((char)ch);
-      }
-      // If current character is a numeral
-      else if(ch>=48&&ch<=57)
-      {
-        if(startChar==0)
-        {
-          startChar = 1;
-        }
-        tokenVal.append((char)ch);
-      }
-      // If current character is a space/new line
-      else if(ch==32||ch==13||ch==10)
-      {
-        if(startChar!=0)
-        {
-          scannerResult[0] = "ATOM";
-          scannerResult[1] = tokenVal.toString();
-          scannerResult[2] = Integer.toString(startChar);
-          scannerResult[3] = "SPACE";
-          return scannerResult;
-        }
-      }
+      scannerResult[0] = "OPEN PARENTHESES";
+			startChar = getNextChar();
+      return scannerResult;
+    }
+    // If current character is a closing parentheses
+    else if(ch==41)
+    {
+      scannerResult[0] = "CLOSING PARENTHESES";
+			startChar = getNextChar();
+			return scannerResult;
+    }
+    // If current character is an uppercase letter
+    else if(ch>=65&&ch<=91)
+    {
+			String result = getLiteralAtom(ch).toString();
+			if(result.charAt(result.length()-1)=='!')
+			{
+				scannerResult[0] = "ERROR";
+				scannerResult[1] = result.substring(0,result.length()-1);
+				return scannerResult;
+			}
 			else
 			{
-				tokenVal.append((char)ch);
-				scannerResult[0] = "ERROR";
-				scannerResult[1] = tokenVal.toString();
+				scannerResult[0] = "ATOM";
+				scannerResult[1] = result.substring(0,result.length()-1);
+				scannerResult[2] = "0";
+				startChar = result.charAt(result.length()-1);
 				return scannerResult;
 			}
     }
-    scannerResult[0] = "EOF";
-    return scannerResult;
+    // If current character is a numeral
+    else if(ch>=48&&ch<=57)
+    {
+			String result = getNumeralAtom(ch).toString();
+			if(result.charAt(result.length()-1)=='!')
+			{
+				scannerResult[0] = "ERROR";
+				scannerResult[1] = result.substring(0,result.length()-1);
+				return scannerResult;
+			}
+			else
+			{
+				scannerResult[0] = "ATOM";
+				scannerResult[1] = result.substring(0,result.length()-1);
+				scannerResult[2] = "1";
+				startChar = result.charAt(result.length()-1);
+				return scannerResult;
+			}
+    }
+    // If current character is a space/new line
+    else if(ch==32||ch==13||ch==10)
+    {
+			startChar = getNextChar();
+			return getNextToken();
+    }
+		// If current character is an EOF
+		else if(ch==-1)
+		{
+			scannerResult[0] = "EOF";
+	    return scannerResult;
+		}
+		// Any other input character is an ERROR
+		else
+		{
+			scannerResult[0] = "ERROR";
+			scannerResult[1] = Character.toString((char)ch);
+			return scannerResult;
+		}
   }
 }
