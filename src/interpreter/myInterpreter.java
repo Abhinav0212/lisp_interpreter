@@ -4,56 +4,53 @@ import java.util.ArrayList;
 
 public class myInterpreter
 {
+	String[] scannerResult = new String[3];
+
 	public static void main(String[] args) throws IOException
 	{
-		String[] scannerResult = new String[3];
-		scannerResult[0] = "Start";
-		myScanner Test = new myScanner();
-		ArrayList<String> literalList = new ArrayList<String>(); // store the list of literal atoms
-		int[] tokenCount = {0,0,0,0};	//keep track of the token counts. 0 - Literal atom, 1 - numeric atom, 2 -open parentheses, 3 - closing parentheses
-		int numericSum = 0;	// store the sum of numeral atoms
-		Test.init();
-
-		while(!scannerResult[0].equals("EOF"))
-		{
-			//System.out.println((char)startChar);
-			scannerResult = Test.getNextToken();
-
-			if(scannerResult[0].equals("ATOM"))
+		myInterpreter Interpreter = new myInterpreter();
+		Interpreter.start();
+	}
+	void start() throws IOException
+	{
+		myScanner Scanner = new myScanner();
+		myParser Parser = new myParser();
+		evalFunction LispInterpreter = new evalFunction();
+		Scanner.init();
+		scannerResult = Scanner.getCurrentToken();
+		if(!scannerResult[0].equals("EOF")){
+			while(!scannerResult[0].equals("EOF"))
 			{
-				if(scannerResult[2].equals("1"))
+				Node root = Parser.parse(Scanner);
+				if(root==null)
 				{
-					numericSum+=Integer.parseInt(scannerResult[1]);
-					tokenCount[1]++;
+					break;
 				}
 				else
 				{
-					literalList.add(scannerResult[1]);
-					tokenCount[0]++;
+					Parser.assignLength(root);
+					// Parser.prettyPrintDot(root);
+					// System.out.println();
+					// Parser.prettyPrintList(root,true);
+					// System.out.println();
 				}
-			}
-			else if(scannerResult[0].equals("OPEN PARENTHESES"))
-			{
-				tokenCount[2]++;
-			}
-			else if(scannerResult[0].equals("CLOSING PARENTHESES"))
-			{
-				tokenCount[3]++;
-			}
-			else if(scannerResult[0].equals("ERROR"))
-			{
-				System.out.println("ERROR: Invalid token " + scannerResult[1]);
-				return;
+				Node cal = LispInterpreter.eval(root);
+				if(cal==null)
+				{
+					break;
+				}
+				else
+				{
+					// Parser.prettyPrintDot(cal);
+					// System.out.println();
+					Parser.prettyPrintList(cal,true);
+					System.out.println();
+				}
+				scannerResult = Scanner.getCurrentToken();
 			}
 		}
-		System.out.print("LITERAL ATOMS: " + tokenCount[0]);
-		for(int i=0;i<literalList.size();i++)
-		{
-			System.out.print(", " + literalList.get(i));
+		else{
+			System.out.println("Error : Empty input string");
 		}
-		System.out.println();
-		System.out.println("NUMERIC ATOMS: " + tokenCount[1] + ", " + numericSum);
-		System.out.println("OPEN PARENTHESES: " + tokenCount[2]);
-		System.out.println("CLOSING PARENTHESES: " + tokenCount[3]);
 	}
 }

@@ -1,50 +1,11 @@
 package interpreter;
 import java.io.*;
 
-public class myParser
+class myParser
 {
 	String[] scannerResult = new String[3];
-	static class Node
-	{
-		Node left;
-    	Node right;
-    	String value;
-		String type;
-    	public Node(String value, String type) {
-      		this.value = value;
-			this.type = type;
-    	}
-  	}
-	public static void main(String[] args) throws IOException
-	{
-		myParser Parser = new myParser();
-		Parser.start();
-	}
-	void start() throws IOException
-	{
-		myScanner Test = new myScanner();
-		Test.init();
-		scannerResult = Test.getCurrentToken();
-		if(!scannerResult[0].equals("EOF")){
-			while(!scannerResult[0].equals("EOF"))
-			{
-				Node root = parse(Test);
-				if(root==null)
-				{
-					break;
-				}
-				else
-				{
-					prettyPrint(root);
-					System.out.println();
-				}
-			}
-		}
-		else{
-			System.out.println("Error : Empty input string");
-		}
-	}
-	void prettyPrint(Node root)
+
+	void prettyPrintList(Node root,boolean start)
 	{
 		if(root.left==null&&root.right==null)
 		{
@@ -52,48 +13,100 @@ public class myParser
 		}
 		else
 		{
+			// System.out.print(root.length);
+			if((start)){
+				System.out.print("(");
+			}
+			if(root.left.left!=null&&root.left.right!=null)
+			{
+				System.out.print("(");
+			}
+			prettyPrintList(root.left,false);
+			if(root.right.value.equals("NIL")){
+				System.out.print(")");
+			}
+			else if(root.right.right==null){
+				System.out.print(" . ");
+				prettyPrintList(root.right,false);
+				System.out.print(")");
+			}
+			else{
+				System.out.print(" ");
+				prettyPrintList(root.right,false);
+			}
+		}
+	}
+
+	void prettyPrintDot(Node root)
+	{
+		if(root.left==null&&root.right==null)
+		{
+			System.out.print(root.value);
+		}
+		else
+		{
+			// System.out.print(root.length);
 			System.out.print("(");
-			prettyPrint(root.left);
+			prettyPrintDot(root.left);
 			System.out.print(" . ");
-			prettyPrint(root.right);
+			prettyPrintDot(root.right);
 			System.out.print(")");
 		}
 	}
-	Node parse(myScanner Test) throws IOException
+
+	int assignLength(Node root){
+		if (root.value=="NIL"){
+			root.length = 0;
+			return 0;
+		}
+		else{
+			// for S-expression which are not a list
+			if(root.right==null){
+				root.length = 0;
+				return 0;
+			}
+			root.length = assignLength(root.right)+1;
+			assignLength(root.left);
+			return root.length;
+		}
+	}
+
+	Node parse(myScanner Scanner) throws IOException
 	{
+		scannerResult = Scanner.getCurrentToken();
 		if(scannerResult[0].equals("ATOM"))
 		{
-			Node current = new Node(scannerResult[1],"LITERAL ATOM");
+			Node current = new Node(scannerResult[1],"",0);
 			if(scannerResult[2].equals("0")){
 				current.type = "LITERAL ATOM";
 			}
 			else{
 				current.type = "NUMERIC ATOM";
 			}
-			Test.moveToNext();
-			scannerResult = Test.getCurrentToken();
+			Scanner.moveToNext();
+			scannerResult = Scanner.getCurrentToken();
 			return current;
 		}
 		else if(scannerResult[0].equals("OPEN PARENTHESES"))
 		{
-			Node head = new Node(" ","SPACE");
+			Node head = new Node(" ","SPACE",0);
 			Node temp = head;
-			Test.moveToNext();
-			scannerResult = Test.getCurrentToken();
+			Scanner.moveToNext();
+			scannerResult = Scanner.getCurrentToken();
 			while(!scannerResult[0].equals("CLOSING PARENTHESES"))
 			{
-				Node leftNode = parse(Test);
+				Node leftNode = parse(Scanner);
 				if (leftNode==null)
 					return null;
 				temp.left = leftNode;
-				Node rightNode = new Node(" ","SPACE");
+				Node rightNode = new Node(" ","SPACE",0);
 				temp.right = rightNode;
 				temp = temp.right;
 			}
 			temp.value = "NIL";
 			temp.type = "NIL";
-			Test.moveToNext();
-			scannerResult = Test.getCurrentToken();
+			Scanner.moveToNext();
+			scannerResult = Scanner.getCurrentToken();
 			return head;
 		}
 		else if(scannerResult[0].equals("ERROR"))
