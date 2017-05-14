@@ -4,12 +4,12 @@
 JAVAC = javac
 
 # Java compiler flags
-JAVAFLAGS = -g
+JAVAFLAGS = -g -classpath .:./src/ -d ./classes
 
 # Creating a .class file
 COMPILE = $(JAVAC) $(JAVAFLAGS)
 
-CLASS_FILES = myInterpreter.class
+CLASS_FILES = src/interpreter/myInterpreter.class
 
 all: $(CLASS_FILES)
 
