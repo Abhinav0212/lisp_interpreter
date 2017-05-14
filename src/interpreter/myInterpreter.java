@@ -2,8 +2,7 @@ package interpreter;
 import java.io.*;
 import java.util.ArrayList;
 
-public class myInterpreter
-{
+public class myInterpreter{
 	String[] scannerResult = new String[3];
 
 	public static void main(String[] args) throws IOException
@@ -15,8 +14,9 @@ public class myInterpreter
 	{
 		myScanner Scanner = new myScanner();
 		myParser Parser = new myParser();
-		evalFunction LispInterpreter = new evalFunction();
+		evalFunction FunctionEvaluator = new evalFunction();
 		Scanner.init();
+		FunctionEvaluator.init();
 		scannerResult = Scanner.getCurrentToken();
 		if(!scannerResult[0].equals("EOF")){
 			while(!scannerResult[0].equals("EOF"))
@@ -29,20 +29,16 @@ public class myInterpreter
 				else
 				{
 					Parser.assignLength(root);
-					// Parser.prettyPrintDot(root);
-					// System.out.println();
-					// Parser.prettyPrintList(root,true);
-					// System.out.println();
 				}
-				Node cal = LispInterpreter.eval(root);
+				Node aList = new Node("NIL","LITERAL ATOM",0);
+				Node dList = FunctionEvaluator.getDList();
+				Node cal = FunctionEvaluator.eval(root, aList, dList);
 				if(cal==null)
 				{
 					break;
 				}
 				else
 				{
-					// Parser.prettyPrintDot(cal);
-					// System.out.println();
 					Parser.prettyPrintList(cal,true);
 					System.out.println();
 				}
