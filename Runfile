@@ -1,3 +1,0 @@
-The instructions for running the program is given below:
-
-java –Xss32m -cp ./classes interpreter.myInterpreter < [Input_File_Name]

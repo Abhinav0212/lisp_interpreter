@@ -1,8 +1,18 @@
 /**
 	A Scanner class to parse the input and return tokens as output.
-	Expected Input 	: Uppercase letters, numerals and round brackets separated by spaces and new lines.
-	Valid tokens 	: Literal Atom - combination of letters and numbers beginning with a letter.
-					  Numeric Atom - combination of one or more numbers.
+	Expected Input 	:
+		A sequence of ASCII characters consisting of
+		• upper-case letters: A, B, ..., Z
+		• digits: 0, 1, ..., 9
+		• parentheses: ( )
+		• ASCII white spaces: space (ASCII value 32), carriage return (ASCII value 13), and line feed
+		(ASCII value 10).
+
+	Valid tokens :
+		Atom, OpenParenthesis, ClosingParenthesis, ERROR, and EOF.
+		There are two types of atom namely :
+			• Literal Atom - combination of letters and numbers beginning with a letter.
+			• Numeric Atom - combination of one or more numbers.
 **/
 package interpreter;
 import java.io.*;

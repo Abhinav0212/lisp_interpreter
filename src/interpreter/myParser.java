@@ -13,7 +13,6 @@ class myParser
 		}
 		else
 		{
-			// System.out.print(root.length);
 			if((start)){
 				System.out.print("(");
 			}
@@ -45,7 +44,6 @@ class myParser
 		}
 		else
 		{
-			// System.out.print(root.length);
 			System.out.print("(");
 			prettyPrintDot(root.left);
 			System.out.print(" . ");
