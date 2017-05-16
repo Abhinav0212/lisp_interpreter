@@ -20,17 +20,18 @@ class myScanner
 {
 	private int startChar ;
 	private String[] currentToken = new String[3];
+	// gets the first token
 	void init() throws IOException
 	{
 		startChar = getNextChar();
 		currentToken = getNextToken();
 	}
-
+	// returns current token
 	String[] getCurrentToken()
 	{
 		return currentToken;
 	}
-
+	// move to next token
 	void moveToNext() throws IOException
 	{
 		currentToken = getNextToken();
